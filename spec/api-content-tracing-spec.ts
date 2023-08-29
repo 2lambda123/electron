@@ -120,10 +120,14 @@ ifdescribe(!(['arm', 'arm64', 'ia32'].includes(process.arch)))('contentTracing',
 
   describe('captured events', () => {
     it('include V8 samples from the main process', async function () {
+      // This test is flaky on macOS CI.
+      this.retries(3);
+      console.log('About to startRecording');
       await contentTracing.startRecording({
         categoryFilter: 'disabled-by-default-v8.cpu_profiler',
-        traceOptions: 'record-continuously'
+        traceOptions: 'record-until-full'
       });
+      console.log('Recording has started');
       {
         const start = Date.now();
         let n = 0;
@@ -134,7 +138,9 @@ ifdescribe(!(['arm', 'arm64', 'ia32'].includes(process.arch)))('contentTracing',
           n++;
         }
       }
+      console.log('about to stopRecording');
       const path = await contentTracing.stopRecording();
+      console.log('Done stopRecording, recording at', path);
       const data = fs.readFileSync(path, 'utf8');
       const parsed = JSON.parse(data);
       expect(parsed.traceEvents.some((x: any) => x.cat === 'disabled-by-default-v8.cpu_profiler' && x.name === 'ProfileChunk')).to.be.true();

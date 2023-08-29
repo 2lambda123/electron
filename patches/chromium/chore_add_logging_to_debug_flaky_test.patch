@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: John Kleinschmidt <jkleinsc@electronjs.org>
+Date: Tue, 29 Aug 2023 14:42:35 -0400
+Subject: chore: add logging to debug flaky test
+
+Temp patch to help debug flaky test
+
+diff --git a/content/browser/tracing/tracing_controller_impl.cc b/content/browser/tracing/tracing_controller_impl.cc
+index 5942c3cc6919c00261665aededb439cf30a0bd3e..92c377dbe4712cfa313906b840c0d1c9a5821f96 100644
+--- a/content/browser/tracing/tracing_controller_impl.cc
++++ b/content/browser/tracing/tracing_controller_impl.cc
+@@ -496,6 +496,7 @@ bool TracingControllerImpl::StopTracing(
+   MojoResult result =
+       mojo::CreateDataPipe(nullptr, producer_handle, consumer_handle);
+   if (result != MOJO_RESULT_OK) {
++    LOG(INFO) << "CALLING COMPLETEFLUSH FROM StopTracing";
+     CompleteFlush();
+     return true;
+   }
+@@ -542,6 +543,7 @@ void TracingControllerImpl::OnTracingEnabled() {
+ void TracingControllerImpl::OnTracingDisabled(bool) {}
+ 
+ void TracingControllerImpl::OnTracingFailed() {
++  LOG(INFO) << "CALLING COMPLETEFLUSH FROM OnTracingFailed";
+   CompleteFlush();
+ }
+ 
+@@ -567,14 +569,18 @@ void TracingControllerImpl::CompleteFlush() {
+ 
+ void TracingControllerImpl::OnDataComplete() {
+   is_data_complete_ = true;
+-  if (read_buffers_complete_)
++  if (read_buffers_complete_) {
++    LOG(INFO) << "CALLING COMPLETEFLUSH FROM OnDataComplete";
+     CompleteFlush();
++  }
+ }
+ 
+ void TracingControllerImpl::OnReadBuffersComplete() {
+   read_buffers_complete_ = true;
+-  if (is_data_complete_)
++  if (is_data_complete_) {
++    LOG(INFO) << "CALLING COMPLETEFLUSH FROM OnReadBuffersComplete";
+     CompleteFlush();
++  }
+ }
+ 
+ #if BUILDFLAG(IS_CHROMEOS_ASH)
