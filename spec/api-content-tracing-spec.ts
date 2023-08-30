@@ -3,10 +3,9 @@ import { app, contentTracing, TraceConfig, TraceCategoriesAndOptions } from 'ele
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { setTimeout } from 'node:timers/promises';
-import { ifdescribe } from './lib/spec-helpers';
 
 // FIXME: The tests are skipped on arm/arm64 and ia32.
-ifdescribe(!(['arm', 'arm64', 'ia32'].includes(process.arch)))('contentTracing', () => {
+describe('contentTracing', () => {
   const record = async (options: TraceConfig | TraceCategoriesAndOptions, outputFilePath: string | undefined, recordTimeInMilliseconds = 1e1) => {
     await app.whenReady();
 
